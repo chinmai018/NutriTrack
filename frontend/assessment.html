@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NutriTrack - New Assessment</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/assessment.css') }}">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <h2 class="logo">🥗 NutriTrack</h2>
+
+        <p class="menu-title">MAIN MENU</p>
+
+        <a href="/" class="nav-link">▦ Dashboard</a>
+        <a href="/assessment" class="nav-link active">＋ New Assessment</a>
+        <a href="/records" class="nav-link">◷ Assessment History</a>
+
+        <div class="sidebar-bottom">
+            <p>Intelligent Nutrition Analysis</p>
+            <small>Early Risk Identification System</small>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <h1>New Nutrition Assessment</h1>
+                <p>Enter information for preliminary nutritional screening.</p>
+            </div>
+            <div class="profile">NT</div>
+        </header>
+
+        <section class="form-container">
+
+            <div class="form-heading">
+                <h2>Personal and Nutrition Information</h2>
+                <p>Fields marked with * are required.</p>
+            </div>
+
+            <form id="assessmentForm">
+
+                <!-- PERSONAL INFORMATION -->
+
+                <div class="form-section">
+                    <h3>1. Personal Information</h3>
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="name">Name or Assessment ID *</label>
+                            <input type="text" id="name" name="name"
+                                   placeholder="Enter name or ID" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="age">Age in years *</label>
+                            <input type="number" id="age" name="age"
+                                   min="1" max="120" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sex">Sex *</label>
+                            <select id="sex" name="sex" required>
+                                <option value="">Select sex</option>
+                                <option value="female">Female</option>
+                                <option value="male">Male</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="height">Height (cm) *</label>
+                            <input type="number" id="height" name="height"
+                                   step="0.1" min="1" max="250" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="weight">Current Weight (kg) *</label>
+                            <input type="number" id="weight" name="weight"
+                                   step="0.1" min="0.1" max="500" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="muac">MUAC (cm), if available</label>
+                            <input type="number" id="muac" name="muac"
+                                   step="0.1" min="0">
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- NUTRITION INFORMATION -->
+
+                <div class="form-section">
+                    <h3>2. Nutrition Information</h3>
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="weightLoss">
+                                Unintentional Weight Loss
+                            </label>
+
+                            <select id="weightLoss" name="weight_loss">
+                                <option value="">Select an option</option>
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                                <option value="unknown">Not sure</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appetite">Recent Appetite</label>
+
+                            <select id="appetite" name="appetite">
+                                <option value="">Select an option</option>
+                                <option value="normal">Normal</option>
+                                <option value="reduced">Reduced</option>
+                                <option value="very_low">Very low</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="foodIntake">
+                                Recent Food Intake
+                            </label>
+
+                            <select id="foodIntake" name="food_intake">
+                                <option value="">Select an option</option>
+                                <option value="normal">Normal</option>
+                                <option value="reduced">Reduced</option>
+                                <option value="very_low">Very low</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="weightLossDuration">
+                                Duration of Weight Loss
+                            </label>
+
+                            <select id="weightLossDuration" name="weight_loss_duration">
+                                <option value="">Select duration</option>
+                                <option value="less_than_1_month">
+                                    Less than 1 month
+                                </option>
+                                <option value="1_to_3_months">
+                                    1 to 3 months
+                                </option>
+                                <option value="more_than_3_months">
+                                    More than 3 months
+                                </option>
+                                <option value="unknown">Not sure</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="diet">
+                                Typical Daily Food Intake
+                            </label>
+
+                            <textarea id="diet" name="diet" rows="4"
+                                placeholder="Describe daily meals..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="symptoms">
+                                Relevant Symptoms or Health Information
+                            </label>
+
+                            <textarea id="symptoms" name="symptoms" rows="4"
+                                placeholder="Enter relevant information..."></textarea>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SUBMISSION -->
+
+                <div class="form-actions">
+                    <a href="/" class="cancel-button">Cancel</a>
+
+                    <button type="submit" class="submit-button">
+                        Submit Assessment
+                    </button>
+                </div>
+
+                <p id="formMessage" role="status"></p>
+
+                <div class="disclaimer">
+                    This form supports preliminary nutrition screening.
+                    It does not provide a medical diagnosis. BMI and
+                    individual nutrition indicators must be interpreted
+                    in the appropriate clinical context.
+                </div>
+
+            </form>
+        </section>
+
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/assessment.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Records | NutriTrack</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .records-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        .records-header {
+            margin-bottom: 22px;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1800px;
+        }
+
+        .records-table th,
+        .records-table td {
+            padding: 12px;
+            border-bottom: 1px solid #edf0f3;
+            text-align: left;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        .records-table th {
+            background: #f4f8f7;
+            color: #17695f;
+        }
+
+        .records-table tr:hover {
+            background: #f9fbfa;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #17695f;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        #recordsMessage {
+            padding: 15px 0;
+            color: #657581;
+        }
+
+        .bmi-value,
+        .score-value {
+            font-weight: bold;
+            color: #17695f;
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="main-content">
+
+    <a class="back-link" href="/">← Back to Dashboard</a>
+
+    <div class="records-container">
+
+        <div class="records-header">
+            <h2>Assessment Records</h2>
+            <p>
+                View personal information, BMI and nutritional
+                screening details for saved assessments.
+            </p>
+        </div>
+
+        <div id="recordsMessage">Loading records...</div>
+
+        <table class="records-table">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name / Assessment ID</th>
+                    <th>Age</th>
+                    <th>Sex</th>
+                    <th>Height (cm)</th>
+                    <th>Weight (kg)</th>
+                    <th>BMI</th>
+                    <th>BMI Indicator</th>
+                    <th>MUAC (cm)</th>
+                    <th>Weight Loss</th>
+                    <th>Weight Loss Duration</th>
+                    <th>Appetite</th>
+                    <th>Food Intake</th>
+                    <th>Screening Score</th>
+                    <th>Screening Category</th>
+                    <th>Symptoms</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody id="recordsTableBody"></tbody>
+
+        </table>
+
+    </div>
+
+</main>
+
+<script>
+    async function loadRecords() {
+        const message = document.getElementById("recordsMessage");
+        const tableBody = document.getElementById("recordsTableBody");
+
+        try {
+            const response = await fetch("/api/assessments");
+
+            if (!response.ok) {
+                throw new Error("Unable to load assessment records.");
+            }
+
+            const records = await response.json();
+
+            tableBody.innerHTML = "";
+
+            if (records.length === 0) {
+                message.textContent = "No assessment records found.";
+                return;
+            }
+
+            message.textContent =
+                records.length + " assessment record(s) found.";
+
+            records.forEach(record => {
+                const row = document.createElement("tr");
+
+                const values = [
+                    record.id,
+                    record.name || "Not provided",
+                    record.age,
+                    record.sex,
+                    record.height,
+                    record.weight,
+                    record.bmi ?? "Not calculated",
+                    record.bmi_indicator || "Not available",
+                    record.muac ?? "Not provided",
+                    record.weight_loss || "Not provided",
+                    record.weight_loss_duration || "Not provided",
+                    record.appetite || "Not provided",
+                    record.food_intake || "Not provided",
+                    record.screening_score ?? "Not calculated",
+                    record.screening_category || "Not calculated",
+                    record.symptoms || "Not provided",
+                    record.created_at || "Not available"
+                ];
+
+                values.forEach((value, index) => {
+                    const cell = document.createElement("td");
+                    cell.textContent = String(value);
+
+                    if (index === 6) {
+                        cell.className = "bmi-value";
+                    }
+
+                    if (index === 13) {
+                        cell.className = "score-value";
+                    }
+
+                    row.appendChild(cell);
+                });
+
+                tableBody.appendChild(row);
+            });
+
+        } catch (error) {
+            message.textContent = error.message;
+        }
+    }
+
+    loadRecords();
+</script>
+
+</body>
+</html>

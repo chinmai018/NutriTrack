@@ -1,0 +1,141 @@
+.form-container {
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.04);
+}
+
+.form-heading {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.form-heading h2 {
+    margin-bottom: 8px;
+    font-size: 22px;
+}
+
+.form-heading p {
+    color: #8995a3;
+    font-size: 13px;
+}
+
+.form-section {
+    margin-bottom: 32px;
+}
+
+.form-section h3 {
+    margin-bottom: 20px;
+    color: #17695f;
+    font-size: 17px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    color: #394b5b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #dce3e9;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #17695f;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.form-actions button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.cancel-btn {
+    background: #edf1f4;
+    color: #394b5b;
+}
+
+.submit-btn {
+    background: #17695f;
+    color: #ffffff;
+}
+
+.submit-btn:hover {
+    background: #12564e;
+}
+
+#formMessage {
+    margin-top: 18px;
+    font-size: 14px;
+}
+
+.disclaimer {
+    margin-top: 20px;
+    padding: 14px;
+    border-radius: 8px;
+    background: #f4f8f7;
+    color: #52636e;
+    font-size: 12px;
+}
+
+@media (max-width: 700px) {
+    .form-container {
+        padding: 18px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: auto;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+}

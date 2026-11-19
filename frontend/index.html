@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NutriTrack - Nutrition Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <h2 class="logo">🥗 NutriTrack</h2>
+
+        <p class="menu-title">MAIN MENU</p>
+
+        <a href="/" class="nav-link active">▦ Dashboard</a>
+        <a href="/assessment" class="nav-link">＋ New Assessment</a>
+        <a href="/records" class="nav-link">◷ Assessment History</a>
+
+        <div class="sidebar-bottom">
+            <p>Intelligent Nutrition Analysis</p>
+            <small>Early Risk Identification System</small>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <h1>Dashboard</h1>
+                <p>Welcome to NutriTrack Nutrition Monitoring System</p>
+            </div>
+
+            <div class="profile">NT</div>
+        </header>
+
+        <section class="welcome-card">
+            <div>
+                <h2>Welcome to NutriTrack!</h2>
+
+                <p>
+                    Monitor nutritional indicators and identify
+                    potential concerns through preliminary BMI
+                    and nutritional factor screening.
+                </p>
+
+                <a href="/assessment" class="primary-button">
+                    + Start New Assessment
+                </a>
+            </div>
+
+            <div class="welcome-icon">🥗</div>
+        </section>
+
+        <!-- BMI SUMMARY CARDS -->
+
+        <h3 class="section-heading">BMI Statistics</h3>
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <p>Total Assessments</p>
+                <h2 id="totalAssessments">0</h2>
+                <span>All recorded assessments</span>
+            </div>
+
+            <div class="stat-card low">
+                <p>Low BMI</p>
+                <h2 id="lowRisk">0</h2>
+                <span>Below 18.5</span>
+            </div>
+
+            <div class="stat-card moderate">
+                <p>Adult BMI Reference Range</p>
+                <h2 id="moderateRisk">0</h2>
+                <span>18.5 to below 25</span>
+            </div>
+
+            <div class="stat-card high">
+                <p>Higher BMI</p>
+                <h2 id="highRisk">0</h2>
+                <span>25 to below 30</span>
+            </div>
+
+            <div class="stat-card">
+                <p>High BMI</p>
+                <h2 id="veryHighRisk">0</h2>
+                <span>30 or above</span>
+            </div>
+
+        </section>
+
+        <!-- NUTRITIONAL SCREENING STATISTICS -->
+
+        <h3 class="section-heading">Nutritional Screening Statistics</h3>
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <p>Calculated Screenings</p>
+                <h2 id="calculatedScreenings">0</h2>
+                <span>Assessments with saved scores</span>
+            </div>
+
+            <div class="stat-card">
+                <p>No Additional Factors Reported</p>
+                <h2 id="noAdditionalFactors">0</h2>
+                <span>No additional factors reported</span>
+            </div>
+
+            <div class="stat-card moderate">
+                <p>Factors Requiring Review</p>
+                <h2 id="factorsRequiringReview">0</h2>
+                <span>Preliminary review category</span>
+            </div>
+
+            <div class="stat-card high">
+                <p>Multiple Factors Requiring Review</p>
+                <h2 id="multipleFactorsRequiringReview">0</h2>
+                <span>Preliminary review category</span>
+            </div>
+
+        </section>
+
+        <!-- CHART AND SYSTEM INFORMATION -->
+
+        <section class="content-grid">
+
+            <div class="panel">
+                <h3>BMI Category Distribution</h3>
+
+                <p class="panel-description">
+                    Distribution of recorded adult BMI categories
+                </p>
+
+                <div class="chart-container">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>System Information</h3>
+
+                <div class="system-info">
+                    <span>Application</span>
+                    <strong>NutriTrack</strong>
+                </div>
+
+                <div class="system-info">
+                    <span>Backend</span>
+                    <strong id="backendStatus">Checking...</strong>
+                </div>
+
+                <div class="system-info">
+                    <span>Database</span>
+                    <strong>Connected</strong>
+                </div>
+
+                <div class="system-info">
+                    <span>Analysis Engine</span>
+                    <strong>Preliminary nutritional screening</strong>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- LATEST ASSESSMENT -->
+
+        <section class="panel latest-assessment-panel">
+
+            <h3>Latest Assessment</h3>
+
+            <p class="panel-description">
+                Most recently submitted assessment information
+            </p>
+
+            <div id="latestAssessment">
+                Loading latest assessment...
+            </div>
+
+            <a href="/records" class="primary-button">
+                View All Assessment Records
+            </a>
+
+        </section>
+
+        <footer>
+            NutriTrack © 2026 | Nutrition Screening and Monitoring
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
