@@ -1,6 +1,7 @@
 
 import sqlite3
 import os
+import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATABASE_PATH = os.path.join(BASE_DIR, "data", "nutritrack.db")
@@ -32,6 +33,12 @@ def initialize_database():
             appetite TEXT,
             food_intake TEXT,
             symptoms TEXT,
+            bmi REAL,
+            bmi_indicator TEXT,
+            screening_message TEXT,
+            screening_score INTEGER,
+            screening_category TEXT,
+            identified_factors TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -47,9 +54,9 @@ def initialize_database():
         "bmi": "REAL",
         "bmi_indicator": "TEXT",
         "screening_message": "TEXT",
-        "weight_loss_duration": "TEXT",
         "screening_score": "INTEGER",
-        "screening_category": "TEXT"
+        "screening_category": "TEXT",
+        "identified_factors": "TEXT"
     }
 
     for column_name, column_type in new_columns.items():
@@ -104,6 +111,15 @@ def save_assessment(data, screening_result=None, nutritional_result=None):
     screening_result = screening_result or {}
     nutritional_result = nutritional_result or {}
 
+    identified_factors = nutritional_result.get(
+        "identified_factors", []
+    )
+
+    if not isinstance(identified_factors, list):
+        identified_factors = []
+
+    factors_json = json.dumps(identified_factors)
+
     cursor = connection.execute("""
         INSERT INTO assessments (
             name,
@@ -121,9 +137,10 @@ def save_assessment(data, screening_result=None, nutritional_result=None):
             bmi_indicator,
             screening_message,
             screening_score,
-            screening_category
+            screening_category,
+            identified_factors
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data.get("name") or data.get("assessment_id"),
         float(data["age"]),
@@ -140,7 +157,8 @@ def save_assessment(data, screening_result=None, nutritional_result=None):
         screening_result.get("indicator"),
         screening_result.get("message"),
         nutritional_result.get("screening_score"),
-        nutritional_result.get("screening_category")
+        nutritional_result.get("screening_category"),
+        factors_json
     ))
 
     connection.commit()
@@ -161,7 +179,50 @@ def get_all_assessments():
 
     connection.close()
 
-    return [dict(record) for record in records]
+    results = []
+
+    for record in records:
+        item = dict(record)
+
+        try:
+            factors = json.loads(item.get("identified_factors") or "[]")
+        except (ValueError, TypeError):
+            factors = []
+
+        # Recover reasons for older records from saved assessment fields.
+        if not factors:
+            if (
+                item.get("age") is not None
+                and float(item["age"]) >= 18
+                and item.get("bmi") is not None
+                and float(item["bmi"]) < 18.5
+            ):
+                factors.append("Low adult BMI")
+
+            if item.get("weight_loss") == "yes":
+                factors.append("Reported unintentional weight loss")
+
+                duration = item.get("weight_loss_duration")
+                if duration:
+                    factors.append(
+                        "Weight loss duration: "
+                        + duration.replace("_", " ")
+                    )
+
+            if item.get("appetite") == "reduced":
+                factors.append("Reduced appetite")
+            elif item.get("appetite") == "very_low":
+                factors.append("Very low appetite")
+
+            if item.get("food_intake") == "reduced":
+                factors.append("Reduced food intake")
+            elif item.get("food_intake") == "very_low":
+                factors.append("Very low food intake")
+
+        item["identified_factors"] = factors
+        results.append(item)
+
+    return results
 
 
 def get_assessment_by_id(assessment_id):
@@ -175,4 +236,16 @@ def get_assessment_by_id(assessment_id):
 
     connection.close()
 
-    return dict(record) if record else None
+    if not record:
+        return None
+
+    item = dict(record)
+
+    try:
+        item["identified_factors"] = json.loads(
+            item.get("identified_factors") or "[]"
+        )
+    except (ValueError, TypeError):
+        item["identified_factors"] = []
+
+    return item

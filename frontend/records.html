@@ -22,10 +22,65 @@
             margin-bottom: 22px;
         }
 
+        .records-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            align-items: end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            min-width: 220px;
+        }
+
+        .control-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #17695f;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 11px;
+            border: 1px solid #dce5e2;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .action-btn {
+            padding: 11px 16px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .clear-btn {
+            background: #657581;
+        }
+
+        .clear-btn:hover {
+            background: #46545e;
+        }
+
+        .export-btn {
+            background: #17695f;
+        }
+
+        .export-btn:hover {
+            background: #105148;
+        }
+
         .records-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1800px;
+            min-width: 1900px;
         }
 
         .records-table th,
@@ -64,6 +119,28 @@
             font-weight: bold;
             color: #17695f;
         }
+
+        .download-btn {
+            display: inline-block;
+            padding: 9px 13px;
+            background: #17695f;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            background: #105148;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 25px;
+            color: #657581;
+        }
     </style>
 </head>
 
@@ -80,7 +157,40 @@
             <p>
                 View personal information, BMI and nutritional
                 screening details for saved assessments.
+                Search, filter and export assessment records.
             </p>
+        </div>
+
+        <div class="records-controls">
+
+            <div class="control-group">
+                <label for="searchInput">
+                    Search by Name or Assessment ID
+                </label>
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Enter name or ID..."
+                >
+            </div>
+
+            <div class="control-group">
+                <label for="categoryFilter">
+                    Filter by Screening Category
+                </label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+
+            <button class="action-btn clear-btn" id="clearFilters">
+                Clear Filters
+            </button>
+
+            <button class="action-btn export-btn" id="exportCsv">
+                Export to CSV
+            </button>
+
         </div>
 
         <div id="recordsMessage">Loading records...</div>
@@ -106,6 +216,7 @@
                     <th>Screening Category</th>
                     <th>Symptoms</th>
                     <th>Date</th>
+                    <th>PDF Report</th>
                 </tr>
             </thead>
 
@@ -118,9 +229,36 @@
 </main>
 
 <script>
+    let allRecords = [];
+    let filteredRecords = [];
+
+    const searchInput = document.getElementById("searchInput");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const clearFilters = document.getElementById("clearFilters");
+    const exportCsv = document.getElementById("exportCsv");
+
+    const csvColumns = [
+        { key: "id", label: "Assessment ID" },
+        { key: "name", label: "Name" },
+        { key: "age", label: "Age" },
+        { key: "sex", label: "Sex" },
+        { key: "height", label: "Height (cm)" },
+        { key: "weight", label: "Weight (kg)" },
+        { key: "bmi", label: "BMI" },
+        { key: "bmi_indicator", label: "BMI Indicator" },
+        { key: "muac", label: "MUAC (cm)" },
+        { key: "weight_loss", label: "Weight Loss" },
+        { key: "weight_loss_duration", label: "Weight Loss Duration" },
+        { key: "appetite", label: "Appetite" },
+        { key: "food_intake", label: "Food Intake" },
+        { key: "screening_score", label: "Screening Score" },
+        { key: "screening_category", label: "Screening Category" },
+        { key: "symptoms", label: "Symptoms" },
+        { key: "created_at", label: "Date" }
+    ];
+
     async function loadRecords() {
         const message = document.getElementById("recordsMessage");
-        const tableBody = document.getElementById("recordsTableBody");
 
         try {
             const response = await fetch("/api/assessments");
@@ -131,61 +269,201 @@
 
             const records = await response.json();
 
-            tableBody.innerHTML = "";
-
-            if (records.length === 0) {
-                message.textContent = "No assessment records found.";
-                return;
+            if (!Array.isArray(records)) {
+                throw new Error("Invalid records data received.");
             }
 
-            message.textContent =
-                records.length + " assessment record(s) found.";
+            allRecords = records;
 
-            records.forEach(record => {
-                const row = document.createElement("tr");
-
-                const values = [
-                    record.id,
-                    record.name || "Not provided",
-                    record.age,
-                    record.sex,
-                    record.height,
-                    record.weight,
-                    record.bmi ?? "Not calculated",
-                    record.bmi_indicator || "Not available",
-                    record.muac ?? "Not provided",
-                    record.weight_loss || "Not provided",
-                    record.weight_loss_duration || "Not provided",
-                    record.appetite || "Not provided",
-                    record.food_intake || "Not provided",
-                    record.screening_score ?? "Not calculated",
-                    record.screening_category || "Not calculated",
-                    record.symptoms || "Not provided",
-                    record.created_at || "Not available"
-                ];
-
-                values.forEach((value, index) => {
-                    const cell = document.createElement("td");
-                    cell.textContent = String(value);
-
-                    if (index === 6) {
-                        cell.className = "bmi-value";
-                    }
-
-                    if (index === 13) {
-                        cell.className = "score-value";
-                    }
-
-                    row.appendChild(cell);
-                });
-
-                tableBody.appendChild(row);
-            });
+            populateCategoryFilter();
+            filterRecords();
 
         } catch (error) {
             message.textContent = error.message;
         }
     }
+
+    function populateCategoryFilter() {
+        const categories = [
+            ...new Set(
+                allRecords
+                    .map(record => record.screening_category)
+                    .filter(category => category)
+            )
+        ];
+
+        categoryFilter.innerHTML =
+            '<option value="">All Categories</option>';
+
+        categories.sort().forEach(category => {
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+        });
+    }
+
+    function filterRecords() {
+        const searchText = searchInput.value.trim().toLowerCase();
+        const selectedCategory = categoryFilter.value;
+
+        filteredRecords = allRecords.filter(record => {
+            const name = String(record.name || "").toLowerCase();
+            const id = String(record.id || "").toLowerCase();
+            const category = String(
+                record.screening_category || ""
+            );
+
+            const matchesSearch =
+                name.includes(searchText) ||
+                id.includes(searchText);
+
+            const matchesCategory =
+                !selectedCategory ||
+                category === selectedCategory;
+
+            return matchesSearch && matchesCategory;
+        });
+
+        displayRecords(filteredRecords);
+    }
+
+    function displayRecords(records) {
+        const message = document.getElementById("recordsMessage");
+        const tableBody = document.getElementById("recordsTableBody");
+
+        tableBody.innerHTML = "";
+
+        message.textContent =
+            records.length + " assessment record(s) found.";
+
+        if (records.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+
+            cell.colSpan = 18;
+            cell.className = "no-results";
+            cell.textContent = "No matching assessment records found.";
+
+            row.appendChild(cell);
+            tableBody.appendChild(row);
+            return;
+        }
+
+        records.forEach(record => {
+            const row = document.createElement("tr");
+
+            const values = [
+                record.id,
+                record.name || "Not provided",
+                record.age ?? "Not provided",
+                record.sex || "Not provided",
+                record.height ?? "Not provided",
+                record.weight ?? "Not provided",
+                record.bmi ?? "Not calculated",
+                record.bmi_indicator || "Not available",
+                record.muac ?? "Not provided",
+                record.weight_loss || "Not provided",
+                record.weight_loss_duration || "Not provided",
+                record.appetite || "Not provided",
+                record.food_intake || "Not provided",
+                record.screening_score ?? "Not calculated",
+                record.screening_category || "Not calculated",
+                record.symptoms || "Not provided",
+                record.created_at || "Not available"
+            ];
+
+            values.forEach((value, index) => {
+                const cell = document.createElement("td");
+                cell.textContent = String(value);
+
+                if (index === 6) {
+                    cell.className = "bmi-value";
+                }
+
+                if (index === 13) {
+                    cell.className = "score-value";
+                }
+
+                row.appendChild(cell);
+            });
+
+            const actionCell = document.createElement("td");
+            const downloadLink = document.createElement("a");
+
+            downloadLink.className = "download-btn";
+            downloadLink.textContent = "Download PDF";
+            downloadLink.href =
+                `/api/assessment/${encodeURIComponent(record.id)}/report`;
+
+            actionCell.appendChild(downloadLink);
+            row.appendChild(actionCell);
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    function escapeCsvValue(value) {
+        let text = String(value ?? "");
+
+        // Prevent spreadsheet formula execution from text fields.
+        if (/^[\s]*[=+\-@]/.test(text)) {
+            text = "'" + text;
+        }
+
+        return '"' + text.replace(/"/g, '""') + '"';
+    }
+
+    function downloadCsv() {
+        if (filteredRecords.length === 0) {
+            alert("There are no records to export.");
+            return;
+        }
+
+        const headers = csvColumns.map(column =>
+            escapeCsvValue(column.label)
+        );
+
+        const rows = filteredRecords.map(record =>
+            csvColumns.map(column =>
+                escapeCsvValue(record[column.key])
+            ).join(",")
+        );
+
+        const csvContent = [
+            headers.join(","),
+            ...rows
+        ].join("\r\n");
+
+        // Add UTF-8 BOM for better Excel compatibility.
+        const blob = new Blob(
+            ["\uFEFF" + csvContent],
+            { type: "text/csv;charset=utf-8;" }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "NutriTrack_Assessment_Records.csv";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    }
+
+    searchInput.addEventListener("input", filterRecords);
+    categoryFilter.addEventListener("change", filterRecords);
+
+    clearFilters.addEventListener("click", function() {
+        searchInput.value = "";
+        categoryFilter.value = "";
+        filterRecords();
+    });
+
+    exportCsv.addEventListener("click", downloadCsv);
 
     loadRecords();
 </script>
